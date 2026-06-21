@@ -1,22 +1,5 @@
 <% layout("/layouts/boilerplate") %>
 
-<% 
-  // Define listing if it's not already defined to prevent ReferenceError. 
-  // This provides a minimal fallback for the template to render without crashing.
-  // The actual fix for missing data should be in the server-side code passing the 'listing' object.
-  if (typeof listing === 'undefined') {
-    listing = {
-      _id: '', // Empty ID for form action and cancel link
-      title: '',
-      description: '',
-      image: {},
-      price: 0,
-      country: '',
-      location: ''
-    };
-  }
-%>
-
 <div class="row justify-content-center">
   <div class="col-12 col-md-10 col-lg-8">
 
