@@ -1,4 +1,37 @@
 const Listing = require("../models/listing");
+const sanitize = require("sanitize-html"); // Install this package: npm install sanitize-html
+
+// Helper function to sanitize user input for listing fields
+const sanitizeListingInput = (listingData) => {
+  const sanitizedData = { ...listingData };
+  // Strip all HTML tags from string fields to prevent XSS via stored malicious input
+  if (sanitizedData.title) {
+    sanitizedData.title = sanitize(sanitizedData.title, {
+      allowedTags: [], // No HTML tags allowed
+      allowedAttributes: {}
+    });
+  }
+  if (sanitizedData.description) {
+    sanitizedData.description = sanitize(sanitizedData.description, {
+      allowedTags: [], // No HTML tags allowed
+      allowedAttributes: {}
+    });
+  }
+  if (sanitizedData.location) {
+    sanitizedData.location = sanitize(sanitizedData.location, {
+      allowedTags: [],
+      allowedAttributes: {}
+    });
+  }
+  if (sanitizedData.country) {
+    sanitizedData.country = sanitize(sanitizedData.country, {
+      allowedTags: [],
+      allowedAttributes: {}
+    });
+  }
+  // Price is a number, no HTML sanitization needed, assumed to be validated by `validateListing` middleware
+  return sanitizedData;
+};
 
 // ==============================
 // INDEX - Show all listings
@@ -42,7 +75,9 @@ module.exports.showListing = async (req, res) => {
 // CREATE - Create new listing
 // ==============================
 module.exports.createListing = async (req, res) => {
-  const newListing = new Listing(req.body.listing);
+  // Sanitize input before creating a new listing to prevent XSS
+  const sanitizedListingData = sanitizeListingInput(req.body.listing);
+  const newListing = new Listing(sanitizedListingData);
   newListing.owner = req.user._id;
 
   if (req.file) {
@@ -79,9 +114,12 @@ module.exports.renderEditForm = async (req, res) => {
 module.exports.updateListing = async (req, res) => {
   const { id } = req.params;
 
+  // Sanitize input before updating the listing to prevent XSS
+  const sanitizedListingData = sanitizeListingInput(req.body.listing);
+
   const listing = await Listing.findByIdAndUpdate(
     id,
-    { ...req.body.listing },
+    { ...sanitizedListingData }, // Use sanitized data here
     { new: true }
   );
 
