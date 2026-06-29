@@ -48,7 +48,7 @@ const sessionOptions = {
   secret,
   resave: false,
   saveUninitialized: false,
-  cookie: { 
+  cookie: {
     httpOnly: true,
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -90,16 +90,25 @@ app.use((req, res) => {
   });
 });
 
+/* ================= ERROR HANDLER ================= */
+app.use((err, req, res, next) => {
+  let { statusCode = 500, message = "Something went wrong" } = err;
+
+  res.status(statusCode).render("error.ejs", {
+    err: { statusCode, message },
+  });
+});
+
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 8080;
 
 async function startServer() {
   try {
     await mongoose.connect(dbUrl);
-    console.log("Connected to DB");
+    console.log("CONNECTED TO DATABASES");
 
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`SERVER IS RUNING ON PORT: ${PORT}`);
     });
   } catch (err) {
     console.log("DB Error:", err);
